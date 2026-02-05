@@ -21,6 +21,9 @@ export default deployScript(
     const registrar = get<
       (typeof artifacts.BaseRegistrarImplementation)['abi']
     >('BaseRegistrarImplementation')
+    const registrarSecurityController = get<
+      (typeof artifacts.RegistrarSecurityController)['abi']
+    >('RegistrarSecurityController')
     const priceOracle = get<
       (typeof artifacts.ExponentialPremiumPriceOracle)['abi']
     >('ExponentialPremiumPriceOracle')
@@ -32,10 +35,10 @@ export default deployScript(
     })
 
     console.log(
-      `  - Adding LegacyETHRegistrarController as controller on BaseRegistrarImplementation`,
+      `  - Adding LegacyETHRegistrarController via RegistrarSecurityController`,
     )
-    await write(registrar, {
-      functionName: 'addController',
+    await write(registrarSecurityController, {
+      functionName: 'addRegistrarController',
       args: [controller.address],
       account: owner,
     })
@@ -50,6 +53,7 @@ export default deployScript(
     tags: ['category:ethregistrar', 'LegacyETHRegistrarController'],
     dependencies: [
       'BaseRegistrarImplementation',
+      'RegistrarSecurityController',
       'ExponentialPremiumPriceOracle',
     ],
   },

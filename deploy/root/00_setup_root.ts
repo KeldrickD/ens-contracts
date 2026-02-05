@@ -14,6 +14,9 @@ export default deployScript(
 
     const registry = get<(typeof artifacts.ENSRegistry)['abi']>('ENSRegistry')
     const root = get<(typeof artifacts.Root)['abi']>('Root')
+    const rootSecurityController = get<
+      (typeof artifacts.RootSecurityController)['abi']
+    >('RootSecurityController')
 
     console.log(`  - Setting owner of root node to root contract`)
     await write(registry, {
@@ -48,6 +51,21 @@ export default deployScript(
             account: owner,
           })
         }
+
+        const securityControllerIsRootController = await read(root, {
+          functionName: 'controllers',
+          args: [rootSecurityController.address],
+        })
+        if (!securityControllerIsRootController) {
+          console.log(
+            `  - Setting RootSecurityController as controller on root contract`,
+          )
+          await write(root, {
+            functionName: 'setController',
+            args: [rootSecurityController.address, true],
+            account: owner,
+          })
+        }
         break
       default:
         console.warn(
@@ -61,6 +79,6 @@ export default deployScript(
   {
     id: 'Root:setup v1.0.0',
     tags: ['category:root', 'Root', 'Root:setup'],
-    dependencies: ['Root:contract'],
+    dependencies: ['Root:contract', 'RootSecurityController'],
   },
 )

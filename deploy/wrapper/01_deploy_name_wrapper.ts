@@ -11,6 +11,9 @@ export default deployScript(
     const registrar = get<
       (typeof artifacts.BaseRegistrarImplementation)['abi']
     >('BaseRegistrarImplementation')
+    const registrarSecurityController = get<
+      (typeof artifacts.RegistrarSecurityController)['abi']
+    >('RegistrarSecurityController')
     const metadata = get<(typeof artifacts.StaticMetadataService)['abi']>(
       'StaticMetadataService',
     )
@@ -37,9 +40,11 @@ export default deployScript(
     // Only attempt to make controller etc changes directly on testnets
     if (network.name === 'mainnet' && !network.tags?.tenderly) return
 
-    console.log(`  - Adding NameWrapper as controller on registrar`)
-    await write(registrar, {
-      functionName: 'addController',
+    console.log(
+      `  - Adding NameWrapper as controller via RegistrarSecurityController`,
+    )
+    await write(registrarSecurityController, {
+      functionName: 'addRegistrarController',
       args: [nameWrapper.address],
       account: owner,
     })
@@ -85,6 +90,7 @@ export default deployScript(
       'StaticMetadataService',
       'ENSRegistry',
       'BaseRegistrarImplementation',
+      'RegistrarSecurityController',
       'ReverseRegistrar', // due to ReverseClaimer
       'OwnedResolver',
     ],

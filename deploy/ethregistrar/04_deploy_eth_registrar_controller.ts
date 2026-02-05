@@ -18,6 +18,9 @@ export default deployScript(
     const registrar = get<
       (typeof artifacts.BaseRegistrarImplementation)['abi']
     >('BaseRegistrarImplementation')
+    const registrarSecurityController = get<
+      (typeof artifacts.RegistrarSecurityController)['abi']
+    >('RegistrarSecurityController')
     const priceOracle = get<
       (typeof artifacts.ExponentialPremiumPriceOracle)['abi']
     >('ExponentialPremiumPriceOracle')
@@ -60,10 +63,10 @@ export default deployScript(
 
     // Add controller to BaseRegistrarImplementation
     console.log(
-      `  - Adding ETHRegistrarController as controller on BaseRegistrarImplementation`,
+      `  - Adding ETHRegistrarController via RegistrarSecurityController`,
     )
-    await write(registrar, {
-      functionName: 'addController',
+    await write(registrarSecurityController, {
+      functionName: 'addRegistrarController',
       args: [controller.address],
       account: owner,
     })
@@ -126,6 +129,7 @@ export default deployScript(
     dependencies: [
       'ENSRegistry',
       'BaseRegistrarImplementation',
+      'RegistrarSecurityController',
       'ExponentialPremiumPriceOracle',
       'ReverseRegistrar',
       'DefaultReverseRegistrar',

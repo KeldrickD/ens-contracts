@@ -14,12 +14,17 @@ export default deployScript(
     const registrar = get<
       (typeof artifacts.BaseRegistrarImplementation)['abi']
     >('BaseRegistrarImplementation')
+    const registrarSecurityController = get<
+      (typeof artifacts.RegistrarSecurityController)['abi']
+    >('RegistrarSecurityController')
 
-    // 1. Transfer ownership of registrar to owner
-    console.log(`  - Transferring ownership of registrar to ${owner}`)
+    // 1. Transfer ownership of registrar to RegistrarSecurityController
+    console.log(
+      `  - Transferring ownership of registrar to RegistrarSecurityController`,
+    )
     await write(registrar, {
       functionName: 'transferOwnership',
-      args: [owner],
+      args: [registrarSecurityController.address],
       account: deployer,
     })
 
@@ -39,6 +44,10 @@ export default deployScript(
       'BaseRegistrarImplementation:setup',
     ],
     // Runs after the root is setup
-    dependencies: ['Root', 'BaseRegistrarImplementation:contract'],
+    dependencies: [
+      'Root',
+      'BaseRegistrarImplementation:contract',
+      'RegistrarSecurityController:contract',
+    ],
   },
 )
